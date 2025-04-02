@@ -47,7 +47,7 @@ const Footer: React.FC<FooterProps> = () => {
           <p>
             Developed by{" "}
             <a href="https://prathamesh.co" target="_blank" rel="noreferrer">
-              Prathamesh Mutkure
+              Lakshman Virijala
             </a>{" "}
             &#169; {new Date().getFullYear()}
           </p>

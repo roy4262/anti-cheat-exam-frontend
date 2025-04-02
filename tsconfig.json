@@ -1,10 +1,18 @@
 {
   "compilerOptions": {
     "target": "es5",
-    "lib": ["dom", "dom.iterable", "esnext"],
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
     "allowJs": true,
     "skipLibCheck": true,
-    "strict": false,
+    "strict": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
     "forceConsistentCasingInFileNames": true,
     "noEmit": true,
     "incremental": true,
@@ -14,8 +22,41 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "preserve",
-    "typeRoots": ["./types", "jest", "node"],
-    "types": ["jest", "node", "@types/jest"]
+    "baseUrl": ".",
+    "paths": {
+      "@/*": [
+        "src/*"
+      ],
+      "@/components/*": [
+        "components/*"
+      ],
+      "@/pages/*": [
+        "pages/*"
+      ],
+      "@/styles/*": [
+        "styles/*"
+      ],
+      "@/types/*": [
+        "types/*"
+      ],
+      "@/models/*": [
+        "models/*"
+      ],
+      "@/helpers/*": [
+        "helpers/*"
+      ],
+      "@/store/*": [
+        "store/*"
+      ]
+    },
+    "typeRoots": [
+      "./node_modules/@types"
+    ],
+    "types": [
+      "@types/jest",
+      "node",
+      "@testing-library/jest-dom"
+    ]
   },
   "include": [
     "next-env.d.ts",
@@ -28,5 +69,7 @@
     "**/*.spec.ts",
     "**/*.test.ts"
   ],
-  "exclude": ["node_modules"]
+  "exclude": [
+    "node_modules"
+  ]
 }

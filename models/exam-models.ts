@@ -1,24 +1,31 @@
 export interface Question {
-  title: string;
-  options: any;
+  question?: string;
+  text?: string;
+  title?: string;
+  options: string[] | Record<string, string>;
+  correctAnswer?: string;
 }
 
 export interface Exam {
   questions: Question[];
   questionCount: number;
   _id: string;
-  name: string;
-  startDate: string;
-  endData: string;
-  duration: number;
-}
-
-export interface AssignedExam {
-  _id: string;
-  questionCount: number;
+  examId: string;
   name: string;
   startDate: string;
   endDate: string;
   duration: number;
-  status: string;
+  description?: string;
+}
+
+export interface AssignedExam {
+  _id: string;
+  examId: string;
+  name: string;
+  startDate: string;
+  endDate: string;
+  duration: number;
+  questionCount?: number;
+  description?: string;
+  status?: string;
 }

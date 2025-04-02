@@ -24,20 +24,26 @@ import LoadingBar, { LoadingBarRef } from "react-top-loading-bar";
 
 interface NavBarDashboardProps {
   window?: () => Window;
-  loadingBarRef: React.RefObject<LoadingBarRef>;
+  loadingBarRef?: React.RefObject<LoadingBarRef>;
 }
 
 const drawerWidth = 240;
 
 const NavBarDashboard: React.FC<NavBarDashboardProps> = (props) => {
-  const { window, loadingBarRef } = props;
+  const { window, loadingBarRef: propLoadingBarRef } = props;
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  // Create a local ref if one isn't provided
+  const localLoadingBarRef = useRef<LoadingBarRef>(null);
+  const loadingBarRef = propLoadingBarRef || localLoadingBarRef;
 
   const router = useRouter();
   const session = useSession();
 
   const showLoading = () => {
-    loadingBarRef.current.continuousStart(50);
+    if (loadingBarRef && loadingBarRef.current) {
+      loadingBarRef.current.continuousStart(50);
+    }
   };
 
   const handleDrawerToggle = () => {
@@ -45,7 +51,9 @@ const NavBarDashboard: React.FC<NavBarDashboardProps> = (props) => {
   };
 
   const handleLogout = async () => {
-    loadingBarRef.current.continuousStart(50);
+    if (loadingBarRef && loadingBarRef.current) {
+      loadingBarRef.current.continuousStart(50);
+    }
     await signOut({ redirect: false });
     await router.replace("/auth/login");
   };
@@ -73,6 +81,7 @@ const NavBarDashboard: React.FC<NavBarDashboardProps> = (props) => {
 
   return (
     <React.Fragment>
+      <LoadingBar color="#f11946" ref={loadingBarRef} />
       <AppBar position="static">
         <Toolbar>
           <IconButton
@@ -110,6 +119,12 @@ const NavBarDashboard: React.FC<NavBarDashboardProps> = (props) => {
             {session.status === "authenticated" && (
               <Link href="/dashboard">
                 <Button sx={{ color: "#fff" }}>Dashboard</Button>
+              </Link>
+            )}
+
+            {session.status === "authenticated" && session.data?.user?.role === "teacher" && (
+              <Link href="/exam/create">
+                <Button sx={{ color: "#fff" }}>Create Exam</Button>
               </Link>
             )}
 

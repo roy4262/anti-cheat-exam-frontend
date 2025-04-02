@@ -7,6 +7,7 @@ import {
 } from "@mui/material";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/router";
+import Link from "next/link";
 import React, { useState } from "react";
 import classes from "./login-form.module.scss";
 import { toast } from "react-toastify";
@@ -20,176 +21,144 @@ interface LoginFormProps {
 
 const LoginForm: React.FC<LoginFormProps> = ({ loadingBarRef }) => {
   const router = useRouter();
-
-  const [formData, setData] = useState({
-    id: "1800760308",
-    password: "12345678",
-  });
-
-  const [errors, setErrors] = useState({
-    idError: "",
-    passwordError: "",
-  });
-
+  const [formData, setFormData] = useState({ email: "", password: "" });
+  const [errors, setErrors] = useState({ emailError: "", passwordError: "" });
   const [loading, setLoading] = useState(false);
 
-  const { id, password } = formData;
-  const { idError, passwordError } = errors;
+  const { email, password } = formData;
+  const { emailError, passwordError } = errors;
 
-  const handleInputChange = (e: any) => {
-    const newData = {
-      ...formData,
-      [e.target.name]: e.target.value,
-    };
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
 
-    setData(newData);
-    validateInputs(newData.id, newData.password);
+    if (name === "email" && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+      setErrors((prev) => ({ ...prev, emailError: "Invalid email address" }));
+    } else if (name === "password" && value.length < 6) {
+      setErrors((prev) => ({ ...prev, passwordError: "Password too short" }));
+    } else {
+      setErrors((prev) => ({ ...prev, [`${name}Error`]: "" }));
+    }
   };
 
-  const validateInputs = (id: string, password: string) => {
-    const idRegex = /^\d{10}$/;
-    const passwordRegex = /^.{8,}$/;
-
-    const isIdValid = idRegex.test(id);
-    const isPasswordValid = passwordRegex.test(password);
-
-    setErrors({
-      idError: isIdValid ? "" : "ID must be a 10 digit number",
-      passwordError: isPasswordValid
-        ? ""
-        : "Password must be atleast 8 character long",
-    });
-  };
-
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    if (loading || idError !== "" || passwordError != "") {
-      return;
-    }
+    if (loading || emailError || passwordError) return;
 
     setLoading(true);
     loadingBarRef?.current?.continuousStart(50);
 
     try {
+      console.log("Attempting login with email:", email);
+
+      console.log("Attempting to sign in with credentials");
+
       const result = await signIn("credentials", {
         redirect: false,
-        id: id,
-        password: password,
+        email,
+        password,
       });
 
-      if (result.error) {
+      console.log("Login Result:", result);
+
+      if (result?.error) {
+        console.error("Login error:", result.error);
         throw new Error(result.error);
       }
 
-      if (result.ok) {
-        router.replace("/dashboard");
-      }
-    } catch (e) {
-      // TODO: Fix login toast error message
+      if (result?.ok) {
+        console.log("Login successful, redirecting to dashboard");
+        toast.success("Login successful!");
 
-      console.log(e);
-      toast(e.message || "Login failed, please try again!");
-      setLoading(false);
-      loadingBarRef?.current?.complete();
+        // Add a small delay before redirecting
+        setTimeout(() => {
+          router.push("/dashboard");
+        }, 500);
+      } else {
+        console.error("Login failed with unknown error");
+        throw new Error("Login failed with unknown error");
+      }
+    } catch (error) {
+      console.error("Login error:", error);
+      toast.error(`Login failed: ${error.message || "Please try again."}`);
     } finally {
-      // setLoading(false);
+      setLoading(false);
       loadingBarRef?.current?.complete();
     }
   };
 
   return (
-    <React.Fragment>
-      <div className={classes.formContainer}>
-        <Container component="main" maxWidth="xs">
-          <CssBaseline />
-
-          <Box
-            sx={{
-              marginTop: 8,
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              border: "solid rgba(0, 0, 0, 0.23) 1px",
-              borderRadius: "0.4rem",
-              padding: "3rem",
+    <Container component="main" maxWidth="xs">
+      <CssBaseline />
+      <Box
+        sx={{
+          marginTop: 8,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          padding: "2rem",
+          border: "1px solid #ccc",
+          borderRadius: "8px",
+        }}
+      >
+        <Avatar sx={{ height: 80, width: 80, mb: 2 }}>
+          <Image src="/images/logo.png" alt="Logo" width={80} height={80} />
+        </Avatar>
+        <Typography component="h1" variant="h5">
+          Anti-Cheat Exam App
+        </Typography>
+        <Box component="form" onSubmit={handleSubmit} sx={{ mt: 2 }}>
+          <TextField
+            label="Email Address"
+            name="email"
+            id="email"
+            value={email}
+            onChange={handleInputChange}
+            required
+            fullWidth
+            margin="normal"
+            error={!!emailError}
+            helperText={emailError}
+            autoComplete="email"
+            inputProps={{
+              "aria-label": "Email Address"
             }}
+          />
+          <TextField
+            label="Password"
+            name="password"
+            id="password"
+            value={password}
+            onChange={handleInputChange}
+            type="password"
+            required
+            fullWidth
+            margin="normal"
+            error={!!passwordError}
+            helperText={passwordError}
+            autoComplete="current-password"
+            inputProps={{
+              "aria-label": "Password"
+            }}
+          />
+          <Button
+            type="submit"
+            fullWidth
+            variant="contained"
+            sx={{ mt: 2 }}
+            disabled={loading || !!emailError || !!passwordError}
           >
-            <Avatar
-              sx={{
-                height: "5rem",
-                width: "5rem",
-                mb: 3,
-              }}
-            >
-              <Image
-                src="/images/logo.png"
-                height="128px"
-                width="128px"
-                alt="Logo"
-              />
-            </Avatar>
-
-            <Typography component="h1" variant="h5" sx={{ mb: 5 }}>
-              Anti-Cheat Exam App
-            </Typography>
-
-            <Box
-              component="form"
-              onSubmit={handleSubmit}
-              noValidate
-              sx={{ mt: 1 }}
-            >
-              <TextField
-                name="id"
-                id="id"
-                value={id}
-                label="ID"
-                onChange={handleInputChange}
-                type="text"
-                margin="normal"
-                required
-                fullWidth
-                autoFocus
-                error={idError != ""}
-                helperText={idError}
-              />
-
-              <TextField
-                name="password"
-                id="password"
-                value={password}
-                label="Password"
-                onChange={handleInputChange}
-                type="password"
-                margin="normal"
-                required
-                fullWidth
-                autoComplete="current-password"
-                error={passwordError != ""}
-                helperText={passwordError}
-              />
-
-              <Button
-                type="submit"
-                fullWidth
-                variant="contained"
-                sx={{ mt: 3, mb: 2 }}
-                onClick={handleSubmit}
-                disabled={loading || idError != "" || passwordError != ""}
-              >
-                Sign In
-              </Button>
-            </Box>
-          </Box>
-
-          {/* <Copyright sx={{ mt: 8, mb: 4 }} /> */}
-        </Container>
-      </div>
-      {/* <div className={classes.footerContainer}>
-        <Footer />
-      </div> */}
-    </React.Fragment>
+            Sign In
+          </Button>
+          <Link href="/auth/signup" passHref>
+            <Button fullWidth variant="text" sx={{ mt: 1 }}>
+              Don't have an account? Sign Up
+            </Button>
+          </Link>
+        </Box>
+      </Box>
+    </Container>
   );
 };
 

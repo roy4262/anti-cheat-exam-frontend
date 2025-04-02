@@ -47,25 +47,43 @@ const QuestionTracker: React.FC<QuestionTrackerProps> = () => {
   const dispatch = useAppDispatch();
   const activeExam = useAppSelector((state) => state.exam.activeExam);
 
-  const currentQuestion = useAppSelector(
-    (state) => state.exam.activeExam.currentQuestion
+  const currentQuestion = useAppSelector((state) =>
+    state.exam.activeExam ? state.exam.activeExam.currentQuestion : 0
   );
 
   const onClick = (index: number) => {
     dispatch(examActions.goToQuestion(index));
   };
 
-  if (!activeExam.exam) {
-    return <p>Error</p>;
+  if (!activeExam) {
+    console.error('No active exam found in store');
+    return (
+      <div style={{ padding: '20px', textAlign: 'center' }}>
+        <h3>Exam data is not available</h3>
+        <p>Please try refreshing the page or return to the dashboard.</p>
+      </div>
+    );
   }
 
-  const { questionCount } = activeExam.exam;
+  if (!activeExam.exam) {
+    console.error('Active exam has no exam property');
+    return (
+      <div style={{ padding: '20px', textAlign: 'center' }}>
+        <h3>Exam data is incomplete</h3>
+        <p>Please try refreshing the page or return to the dashboard.</p>
+      </div>
+    );
+  }
+
+  // Get the actual number of questions
+  const actualQuestionCount = activeExam.exam.questions ? activeExam.exam.questions.length : 0;
+  console.log(`Question tracker: Total questions = ${actualQuestionCount}`);
 
   return (
     <div className={classes.quesTracker}>
       <div className={classes.questionCircles}>
         <Grid container rowSpacing={2} justifyContent="center">
-          {Array.from(Array(questionCount).keys()).map((i) => (
+          {Array.from(Array(actualQuestionCount).keys()).map((i) => (
             <QuestionCircle
               key={i}
               questionNumber={i + 1}

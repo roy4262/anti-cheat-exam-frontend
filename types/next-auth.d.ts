@@ -6,8 +6,12 @@ declare global {}
 declare module "next-auth" {
   interface User {
     id: string;
-    fname: string;
-    lname: string;
+    email: string;
+    role: string;
+    firstName: string;
+    lastName: string;
+    studentId?: string;
+    teacherId?: string;
     token: string;
   }
 
@@ -26,8 +30,12 @@ declare module "next-auth/jwt" {
     idToken?: string;
     user: {
       id: string;
-      fname: string;
-      lname: string;
+      email: string;
+      role: string;
+      firstName: string;
+      lastName: string;
+      studentId?: string;
+      teacherId?: string;
       token: string;
     };
   }
